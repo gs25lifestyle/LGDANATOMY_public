@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LGenius 스케치</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#07090c; --panel:#0e1217; --line:#1c232b; --text:#e9edf1; --sub:#9aa4ae; --muted:#5d6670;
+  --lgd:#ff4fa3; --sdc:#6f9bd1; --boe:#5fb3a8; --csot:#c9a46a; --tianma:#9a8fc9; --visionox:#b98a8a;
+  --lcd:#f5a052; --oled:#34d6c4; --micro:#b294ff; --common:#56616c;
+  --mono:"IBM Plex Mono",ui-monospace,monospace; --sans:"Pretendard Variable",Pretendard,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.eyebrow{font:500 12px var(--mono);letter-spacing:.08em;color:var(--sub);text-transform:uppercase}
+.note{font:12px var(--mono);color:var(--muted)}
+/* hero */
+#hero{position:relative;height:86vh;min-height:600px;overflow:hidden}
+#hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-copy{position:absolute;left:24px;top:28px;max-width:560px;pointer-events:none}
+.hero-copy h1{font-size:clamp(22px,4.4vw,56px);line-height:1.12;margin:10px 0 12px;font-weight:700;letter-spacing:-.02em}
+.hero-copy p{color:var(--sub);font-size:16px;line-height:1.7;margin:0}
+#year{position:absolute;right:28px;top:22px;font:500 clamp(40px,7vw,96px) var(--mono);color:#ffffff22;pointer-events:none}
+.legend{position:absolute;left:24px;bottom:22px;display:flex;flex-wrap:wrap;gap:6px 16px;font:12px var(--mono);color:var(--sub)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.controls{position:absolute;right:24px;bottom:18px;display:flex;gap:8px}
+button{font:500 13px var(--sans);color:var(--text);background:#ffffff0d;border:1px solid #ffffff1f;border-radius:999px;padding:8px 14px;cursor:pointer}
+button:hover{background:#ffffff1a}
+button.on{background:var(--text);color:var(--bg)}
+#tip{position:fixed;pointer-events:none;background:#11161cee;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:12px/1.6 var(--mono);color:var(--text);opacity:0;transition:opacity .12s;z-index:9;max-width:320px}
+/* sections */
+section.screen{padding:96px 0 72px;border-top:1px solid var(--line)}
+section.screen h2{font-size:clamp(26px,3vw,38px);margin:8px 0 8px;letter-spacing:-.01em}
+.q{color:var(--sub);font-size:17px;margin:0 0 6px}
+.read{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border-radius:14px;padding:14px 16px;margin:18px 0 22px;color:var(--sub);font-size:14px;line-height:1.6}
+.read b{color:var(--text);font-weight:600;white-space:nowrap;flex:none}
+.read span{flex:1;min-width:0}
+.seg{position:relative;display:inline-flex;gap:0;padding:4px;margin:0 0 16px;background:#ffffff0a;border:1px solid #ffffff14;border-radius:999px}
+.seg button{position:relative;z-index:1;border:0;background:transparent;color:var(--sub);padding:9px 18px;font:500 14px var(--sans);transition:color .25s}
+.seg button:hover{background:transparent;color:var(--text)}
+.seg button.on{color:var(--bg)}
+.seg-ind{position:absolute;left:4px;top:4px;bottom:4px;border-radius:999px;background:var(--text);transition:transform .35s cubic-bezier(.65,0,.35,1),width .35s cubic-bezier(.65,0,.35,1)}
+@media (max-width:700px){ .read{flex-direction:column;gap:4px} }
+.tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.chart{background:var(--panel);border-radius:18px;padding:18px 18px 8px}
+svg text{fill:var(--sub);font:11px var(--mono)}
+.axis path,.axis line{stroke:var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
+.chip{font:12px var(--mono);border-radius:999px;padding:6px 12px;border:1px solid #ffffff1f;cursor:pointer;color:var(--sub);background:transparent}
+.chip.on{color:var(--text)}
+.chip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.caveat{margin-top:14px}
+@media (max-width:700px){ .wrap{padding:0 16px} .hero-copy{left:16px;right:16px} .controls{right:16px;left:16px;bottom:56px} .legend{left:16px;bottom:16px} }
+</style>
+</head>
+<body>
+<div id="tip"></div>
+
+<section id="hero">
+  <canvas id="cv"></canvas>
+  <div class="hero-copy">
+    <div class="eyebrow">LGenius · 스케치 v0.1</div>
+    <h1>LG디스플레이를<br>픽셀로 분해하다</h1>
+    <p>픽셀 하나 = 미국 특허 공개 10건. 띠 하나가 한 해예요.</p>
+  </div>
+  <div id="year">2016</div>
+  <div class="legend" id="legend"></div>
+  <div class="controls"><button id="replay" class="on">연도별</button><button id="toMatrix">회사 × 기술</button></div>
+</section>
+
+<section class="screen" id="business">
+  <div class="wrap">
+    <div class="eyebrow">01 · 사업</div>
+    <h2>LGD는 무엇으로 돈을 버나?</h2>
+    <p class="q">용도별 매출 비중 (DART 사업보고서, 2018~2025)</p>
+    <div class="read"><b>읽는 법</b><span id="bizread"></span></div>
+    <div class="seg" id="bizseg"><span class="seg-ind"></span><button class="on" data-v="mix">LGD 용도별</button><button data-v="cmp">6개 회사 비교</button></div>
+    <div class="chart"><svg id="biz" width="100%" height="420"></svg>
+      <div class="chips" id="chips"></div>
+    </div>
+    <p class="note caveat" id="caveat"></p>
+  </div>
+</section>
+
+<section class="screen" id="research">
+  <div class="wrap">
+    <div class="eyebrow">02 · 연구</div>
+    <h2>LGD는 어디에 연구를 쏟나?</h2>
+    <p class="q">기술 칸 × 기반 기술별 특허 수 (한국 특허, 출원 연도 기준)</p>
+    <div class="read"><b>읽는 법</b><span>칸이 진할수록 그해 그 회사 특허 중 많은 몫이 몰린 곳이에요. 왼쪽 첫 열은 칸 전체, 나머지 열은 그 칸 안에서 기반 기술이 붙은 특허예요(한 특허에 여러 기술이 붙을 수 있어요). 위의 연도 막대(그해 특허 수)를 누르거나 마우스를 올리면 그 해로 바뀌어요. 줄 이름(기술 칸)을 누르면 아래에 "공부할 기술"이 나와요.</span></div>
+    <div class="tabs" id="rcomp"></div>
+    <div class="chart">
+      <div style="display:flex;align-items:flex-end;gap:18px;margin:4px 4px 6px">
+        <svg id="ybars" style="flex:1" height="92"></svg>
+        <span id="ryearv" style="font:500 28px var(--mono);min-width:76px;text-align:right;padding-bottom:22px">2024</span>
+      </div>
+      <svg id="heat" width="100%" height="330"></svg>
+      <div id="study" style="margin:10px 4px 6px;padding:14px 16px;border-radius:12px;background:#ffffff08;font-size:14px;line-height:1.7;color:var(--sub)"></div>
+    </div>
+    <p class="note caveat">한국 특허(1차 KIPRIS 데이터)라서 지금은 LGD와 삼성D만 볼 수 있어요. 미국 특허 수집이 끝나면 6개 회사가 같은 기준으로 바뀌어요. 2024~2025년은 아직 공개되지 않은 특허가 많아 적게 보여요. WOLED는 특허 글에서 잘 구분되지 않아 거의 비어 있어요(분류 규칙 문서 참고).</p>
+  </div>
+</section>
+
+<section class="screen" id="partners">
+  <div class="wrap">
+    <div class="eyebrow">03 · 협력</div>
+    <h2>LGD는 누구와 함께 연구하나?</h2>
+    <p class="q">공동특허 · 기술 계약 · 지분 투자 · 공동논문으로 이어진 상대 (2016~2026)</p>
+    <div class="read"><b>읽는 법</b><span>가운데가 회사, 둘레의 점이 함께 일한 상대예요. 가까이 있고 클수록 관계의 근거가 많아요. 선이 굵을수록 근거가 많고, 점의 색은 상대의 종류예요. 점을 누르면 어떤 근거로 이어졌는지 보여요.</span></div>
+    <div class="seg" id="pseg"><span class="seg-ind"></span><button class="on" data-k="LGD">LGD</button><button data-k="SamsungD">삼성D</button></div>
+    <div class="chart" style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;padding:16px">
+      <svg id="net" width="100%" height="520" style="display:block"></svg>
+      <div id="pinfo" style="background:#ffffff08;border-radius:14px;padding:16px;font-size:14px;line-height:1.7;color:var(--sub)"></div>
+    </div>
+    <div class="chips" id="pkinds"></div>
+    <p class="note caveat">"함께 특허를 냈다 = 함께 연구했다"까지만 말할 수 있어요. 납품·하청 계약은 공시되지 않아 다루지 않아요. 삼성D는 지금 한국 공동특허만 있어요(계약·투자는 삼성전자 보고서에서 추가 예정). 같은 회사의 다른 표기는 자동으로 묶었고, 덜 묶인 이름이 남아 있을 수 있어요.</p>
+  </div>
+</section>
+
+<section class="screen" id="compete">
+  <div class="wrap">
+    <div class="eyebrow">04 · 경쟁</div>
+    <h2>누가 늘리고 누가 줄이나?</h2>
+    <p class="q">기술 칸별 미국 특허 출원 (출원 연도 기준, EPO 수집)</p>
+    <div class="read"><b>읽는 법</b><span id="cread"></span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <div class="seg" id="cseg"><span class="seg-ind"></span></div>
+      <div class="seg" id="mseg"><span class="seg-ind"></span><button class="on" data-m="share">회사 안 비중</button><button data-m="n">건수</button></div>
+    </div>
+    <div class="chart"><svg id="cline" width="100%" height="320"></svg><div class="chips" id="cchips"></div></div>
+    <p class="q" style="margin-top:28px">이 칸에서 몇 위였나 (건수 순위)</p>
+    <div class="chart"><svg id="cbump" width="100%" height="230"></svg></div>
+    <p class="note caveat" id="ccav"></p>
+  </div>
+</section>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="data.js"></script>
+<script>
+const S = window.SKETCH;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const COMP = [
+  {k:"LGD", n:"LGD", c:css("--lgd")}, {k:"SamsungD", n:"삼성D", c:css("--sdc")}, {k:"BOE", n:"BOE", c:css("--boe")},
+  {k:"CSOT", n:"CSOT", c:css("--csot")}, {k:"Tianma", n:"Tianma", c:css("--tianma")}, {k:"Visionox", n:"Visionox", c:css("--visionox")}];
+const CELLS = [{k:"LCD", c:css("--lcd")}, {k:"OLED", c:css("--oled")}, {k:"MicroLED", c:css("--micro")}, {k:"구동·터치·기타", c:css("--common")}, {k:"분류 전", c:"#c8d0d8"}];
+const tip = document.getElementById("tip");
+function showTip(html, x, y){ tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(x + 14, innerWidth - 330) + "px"; tip.style.top = (y + 14) + "px"; }
+function hideTip(){ tip.style.opacity = 0; }
+
+/* ---------- HERO: lit panel -> matrix ---------- */
+document.getElementById("legend").innerHTML = CELLS.map(c => `<span><i style="background:${c.c}"></i>${c.k}</span>`).join("") + `<span class="note">LGD·삼성D만 칸 분류(한국 특허 기준), 나머지는 미국 특허 수집 중</span>`;
+const cv = document.getElementById("cv"), main = cv.getContext("2d");
+const off = document.createElement("canvas"), ctx = off.getContext("2d");  // pixels are drawn here, then glowed onto the main canvas
+let W, H, DPR, F, yearBands = [], px = [], phase = "light", t0 = 0, scanY = 0, blocks = [];
+function cellOf(comp, year){
+  const k = S.kipris_cells[comp]; if(!k || !k[year]) return null;
+  const v = k[year], tot = Object.values(v).reduce((a,b)=>a+b,0);
+  const oled = (v["RGB OLED"]||0)+(v["WOLED"]||0)+(v["차세대 OLED"]||0);
+  return [["LCD",(v.LCD||0)/tot],["OLED",oled/tot],["MicroLED",(v.MicroLED||0)/tot],["구동·터치·기타",(v["구동·터치·기타"]||0)/tot]];
+}
+function build(){
+  DPR = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = off.width = W * DPR; cv.height = off.height = H * DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+  px = [];
+  for(const r of S.us_counts){
+    const n = Math.round(r.n / 10), mix = cellOf(r.company, r.year);
+    for(let i = 0; i < n; i++){
+      let cell = "분류 전";
+      if(mix){ let u = Math.random(), acc = 0; for(const [c,p] of mix){ acc += p; if(u <= acc){ cell = c; break; } } if(cell==="분류 전") cell = "구동·터치·기타"; }
+      px.push({comp:r.company, year:r.year, cell, x:0, y:0, tx:0, ty:0, a:0});
+    }
+  }
+  // panel: years fill calmly from left to right, column by column (top to bottom), sorted by cell
+  const ORDER = {"LCD":0, "OLED":1, "MicroLED":2, "구동·터치·기타":3, "분류 전":4};
+  px.sort((a,b) => a.year - b.year || ORDER[a.cell] - ORDER[b.cell]);
+  // smaller frame: at most 820 px wide and about a third of the screen tall, centred under the title
+  F = {w: Math.min(W - 40, 820), h: Math.min(H * .36, 300)}; F.x = (W - F.w) / 2; F.y = Math.max(H * .4, 250);
+  const rows = 60, cols = Math.ceil(px.length / rows);
+  const sw = F.w / cols, sh = F.h / rows;
+  px.forEach((p,i) => { p.i = i; p.px = F.x + Math.floor(i / rows) * sw; p.py = F.y + (i % rows) * sh; p.x = p.px; p.y = p.py; p.s = p.w = Math.max(1.5, sw - .8); p.h = p.hh = Math.max(1.5, sh - 1); p.d = Math.random() * .45; });
+  yearBands = d3.rollups(px, v => d3.mean(v, p => p.px) + sw / 2, p => p.year).map(([year, mid]) => ({year, mid}));
+  // matrix targets: block per company x cell
+  const top = F.y, left = F.x + 70, bw = (F.w - 70) / CELLS.length, bh = F.h / COMP.length;
+  blocks = [];
+  COMP.forEach((c,ri) => CELLS.forEach((cl,ci) => {
+    const mem = px.filter(p => p.comp === c.k && p.cell === cl.k);
+    const x0 = left + ci * bw + 4, y0 = top + ri * bh + 3, inner = Math.max(2, Math.floor((bw - 8) / 2));
+    mem.forEach((p,j) => { p.mx = x0 + (j % inner) * 2; p.my = y0 + Math.floor(j / inner) * 2; });
+    blocks.push({c, cl, n: mem.length * 10, x:x0, y:y0, w:bw - 12, h:bh - 8});
+  }));
+  t0 = performance.now();
+}
+const yearEl = document.getElementById("year");
+function frame(now){
+  ctx.clearRect(0,0,W,H);
+  const el = (now - t0) / 1000;
+  if(phase === "light"){
+    // all years shown at once, with a year label under each band
+    yearEl.textContent = "2016–2025";
+    for(const p of px){ p.a = 1; p.x = p.px; p.y = p.py; p.w = p.s; p.hh = p.h; }
+    ctx.font = "11px IBM Plex Mono, monospace"; ctx.textBaseline = "top"; ctx.fillStyle = "#7d8792"; ctx.textAlign = "center";
+    for(const b of yearBands) ctx.fillText(b.year, b.mid, F.y + F.h + 10);
+    ctx.textAlign = "left";
+  } else {
+    yearEl.textContent = "2016–2025";
+    // staggered, eased move: each pixel waits a little, then glides and shrinks into its block
+    const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    let k = 1;
+    for(const p of px){
+      const kk = Math.max(0, Math.min(1, (el - p.d) / 1.1)), e = ease(kk); k = Math.min(k, kk);
+      p.x = p.px + (p.mx - p.px) * e; p.y = p.py + (p.my - p.py) * e; p.a = 1;
+      p.w = p.s + (1.6 - p.s) * e; p.hh = p.h + (1.6 - p.h) * e;
+    }
+    scanY = (scanY + 1.4) % (H * .64);
+    // labels
+    ctx.font = "12px IBM Plex Mono, monospace"; ctx.textBaseline = "middle";
+    if(k >= 1){
+      blocks.forEach(b => { if(b.cl.k === CELLS[0].k){ ctx.fillStyle = b.c.c; ctx.fillText(b.c.n, F.x, b.y + 8); } });
+      CELLS.forEach((cl,ci) => { const b = blocks[ci]; ctx.fillStyle = "#9aa4ae"; ctx.fillText(cl.k, b.x, F.y - 12); });
+    }
+  }
+  const scanAbs = H * .3 + scanY;
+  for(const p of px){
+    if(p.a < .02) continue;
+    const base = CELLS.find(c => c.k === p.cell).c;
+    let alpha = p.a * (p.cell === "분류 전" ? .16 : 1);
+    ctx.globalAlpha = alpha; ctx.fillStyle = phase === "matrix" && p.comp === "LGD" && p.cell !== "분류 전" ? base : base;
+    ctx.fillRect(p.x, p.y, p.w, p.hh);
+  }
+  ctx.globalAlpha = 1;
+  // glossy glow: sharp pixels + two blurred copies added on top (bloom)
+  main.setTransform(1,0,0,1,0,0); main.clearRect(0,0,cv.width,cv.height);
+  main.drawImage(off, 0, 0);  // plain (matte) pixels; the glossy bloom was removed at the owner's request
+  requestAnimationFrame(frame);
+}
+cv.addEventListener("mousemove", e => {
+  if(phase !== "matrix") return hideTip();
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const b = blocks.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
+  b && b.n ? showTip(`<b style="color:${b.c.c}">${b.c.n}</b> · ${b.cl.k}<br>미국 특허 공개 약 ${b.n.toLocaleString()}건<br><span style="color:#5d6670">누르면 상세 화면으로 (예정)</span>`, e.clientX, e.clientY) : hideTip();
+});
+cv.addEventListener("mouseleave", hideTip);
+const btnY = document.getElementById("replay"), btnM = document.getElementById("toMatrix");
+btnY.onclick = () => { phase = "light"; btnY.classList.add("on"); btnM.classList.remove("on"); };
+btnM.onclick = () => { if(phase === "matrix") return; phase = "matrix"; t0 = performance.now(); btnM.classList.add("on"); btnY.classList.remove("on"); };
+addEventListener("resize", () => { build(); });
+build(); requestAnimationFrame(frame);
+
+/* ---------- BUSINESS ---------- */
+const svg = d3.select("#biz"), USES = [["TV","#e8eef4"],["IT","#aab4be"],["Mobile","#6e7984"],["Auto","#3d4650"]];
+let view = "mix", visible = new Set(COMP.map(c => c.k));
+function draw(){
+  svg.selectAll("*").remove();
+  const w = Math.max(320, svg.node().getBoundingClientRect().width || 900), h = 420, m = {t:20, r:56, b:30, l:44};
+  const g = svg.append("g");
+  const chips = document.getElementById("chips"), cav = document.getElementById("caveat");
+  if(view === "mix"){
+    const data = S.lgd_mix.map(d => { const tot = d.TV + d.IT + d.Mobile + d.Auto; return {year:d.year, TV:d.TV/tot*100, IT:d.IT/tot*100, Mobile:d.Mobile/tot*100, Auto:d.Auto/tot*100, tot}; });
+    const x = d3.scaleLinear().domain(d3.extent(data, d => d.year)).range([m.l, w - m.r]), y = d3.scaleLinear().domain([0,100]).range([h - m.b, m.t]);
+    const stack = d3.stack().keys(USES.map(u => u[0]))(data);
+    g.selectAll("path.l").data(stack).join("path").attr("fill", (d,i) => USES[i][1]).attr("fill-opacity", .9)
+      .attr("d", d3.area().x(d => x(d.data.year)).y0(d => y(d[0])).y1(d => y(d[1])).curve(d3.curveMonotoneX));
+    stack.forEach((s,i) => { const last = s[s.length - 1]; if(last[1] - last[0] > 4) g.append("text").attr("x", w - m.r + 6).attr("y", y((last[0] + last[1]) / 2)).attr("dy", 4).text(USES[i][0]); });
+    const ol = S.lgd_oled_share;
+    const OLC = css("--oled");  // OLED teal, with a dark outline so it reads on both light and dark bands
+    g.append("path").datum(ol).attr("fill","none").attr("stroke", OLC).attr("stroke-width", 3.5).attr("stroke-linecap","round").attr("d", d3.line().x(d => x(d.year)).y(d => y(d.v)));
+    const lastO = ol[ol.length - 1];
+    g.append("rect").attr("x", x(lastO.year) - 92).attr("y", y(lastO.v) - 34).attr("width", 84).attr("height", 22).attr("rx", 11).attr("fill", "#07090c").attr("fill-opacity", .85);
+    g.append("text").attr("x", x(lastO.year) - 50).attr("y", y(lastO.v) - 19).attr("text-anchor", "middle").style("fill", OLC).style("font-size", "13px").style("font-weight", 500).text(`OLED ${lastO.v}%`);
+    g.append("rect").attr("x", m.l).attr("y", m.t).attr("width", w - m.l - m.r).attr("height", h - m.t - m.b).attr("fill","transparent")
+      .on("mousemove", e => { const yr = Math.round(x.invert(d3.pointer(e)[0])), d = data.find(d => d.year === yr), o = ol.find(o => o.year === yr); if(d) showTip(`<b>${yr}년</b> 매출 ${(d.tot/1e6).toFixed(1)}조원<br>` + USES.map(u => `${u[0]} ${d[u[0]].toFixed(1)}%`).join("<br>") + `<br><span style="color:${OLC}">OLED 비중 ${o ? o.v + "%" : "공개 자료 없음"}</span>`, e.clientX, e.clientY); }).on("mouseleave", hideTip);
+    g.append("g").attr("class","axis").attr("transform",`translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(8).tickFormat(d3.format("d")));
+    g.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"));
+    chips.innerHTML = USES.map(u => `<span class="chip on"><i style="background:${u[1]}"></i>${u[0]}</span>`).join("") + `<span class="chip on"><i style="background:${OLC}"></i>OLED 비중</span>`;
+    document.getElementById("bizread").textContent = "띠의 두께가 그해 매출에서 그 용도가 차지한 비중이에요. 위에 걸친 선은 전체 매출 중 OLED 제품 비중이에요(LGD 실적 보도자료). 그래프 위에 마우스를 올리면 그해 숫자가 보여요.";
+    cav.textContent = "2016·2017년 사업보고서는 국내/해외로만 나뉘어 용도별 비중이 없어요. 차량용(Auto)은 2024년부터 따로 공시돼요(이전에는 모바일 등에 포함된 것으로 보임, 확인 필요).";
+  } else {
+    const base = 2019, rows = COMP.map(c => { const key = c.k === "CSOT" ? "TCL_CSOT" : c.k, d = S.display_revenue[key] || {}; const b = d[base];
+      return {c, pts: Object.entries(d).map(([y,v]) => ({year:+y, v: b ? v / b * 100 : null, raw:v, unit:S.display_revenue_unit[key]})).filter(p => p.v !== null)}; });
+    const all = rows.flatMap(r => r.pts);
+    const x = d3.scaleLinear().domain([2016, 2025]).range([m.l, w - m.r]), y = d3.scaleLinear().domain([0, d3.max(all, p => p.v) * 1.05]).nice().range([h - m.b, m.t]);
+    g.append("line").attr("x1", m.l).attr("x2", w - m.r).attr("y1", y(100)).attr("y2", y(100)).attr("stroke","#ffffff30").attr("stroke-dasharray","3 3");
+    rows.filter(r => visible.has(r.c.k)).sort((a,b) => (a.c.k === "LGD") - (b.c.k === "LGD")).forEach(r => {
+      g.append("path").datum(r.pts).attr("fill","none").attr("stroke", r.c.c).attr("stroke-width", r.c.k === "LGD" ? 3 : 1.6).attr("d", d3.line().x(d => x(d.year)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+      const last = r.pts[r.pts.length - 1]; g.append("text").attr("x", x(last.year) + 8).attr("y", y(last.v)).attr("dy", 4).style("fill", r.c.c).text(r.c.n);
+    });
+    const guide = g.append("line").attr("y1", m.t).attr("y2", h - m.b).attr("stroke", "#ffffff30").style("opacity", 0);
+    g.append("rect").attr("x", m.l).attr("y", m.t).attr("width", w - m.l - m.r).attr("height", h - m.t - m.b).attr("fill","transparent")
+      .on("mousemove", e => { const yr = Math.round(x.invert(d3.pointer(e)[0])); guide.attr("x1", x(yr)).attr("x2", x(yr)).style("opacity", 1);
+        const lines = rows.filter(r => visible.has(r.c.k)).map(r => { const p = r.pts.find(p => p.year === yr); return p ? `<span style="color:${r.c.c}">${r.c.n}</span> ${Math.round(p.v)} <span style="color:#5d6670">(${p.raw.toLocaleString()} ${p.unit})</span>` : `<span style="color:${r.c.c}">${r.c.n}</span> <span style="color:#5d6670">자료 없음</span>`; });
+        showTip(`<b>${yr}년</b> · 2019년 = 100<br>` + lines.join("<br>"), e.clientX, e.clientY); })
+      .on("mouseleave", () => { hideTip(); guide.style("opacity", 0); });
+    document.getElementById("bizread").textContent = "선이 위로 갈수록 2019년보다 디스플레이 매출이 커졌다는 뜻이에요(2019년 = 100). 아래 점선이 100이에요. 회사 이름을 눌러 켜고 끄고, 그래프 위에 마우스를 올리면 그해 값이 보여요.";
+    g.append("g").attr("class","axis").attr("transform",`translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(10).tickFormat(d3.format("d")));
+    g.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(6));
+    chips.innerHTML = COMP.map(c => `<span class="chip ${visible.has(c.k) ? "on" : ""}" data-k="${c.k}" style="border-color:${visible.has(c.k) ? c.c : "#ffffff1f"}"><i style="background:${c.c}"></i>${c.n}</span>`).join("");
+    chips.querySelectorAll(".chip").forEach(el => el.onclick = () => { const k = el.dataset.k; visible.has(k) ? visible.delete(k) : visible.add(k); draw(); });
+    cav.textContent = "회사마다 통화(원/위안)와 공시 기준이 달라 금액 대신 '2019년 = 100' 지수로 비교해요. LGD·삼성D는 디스플레이 매출, BOE·CSOT는 디스플레이 사업부, Tianma는 전체 매출, Visionox는 OLED 매출. BOE 사업부 범위는 해마다 이름·범위가 바뀌었어요(확인 필요).";
+  }
+}
+const seg = document.getElementById("bizseg"), segInd = seg.querySelector(".seg-ind");
+function moveInd(){ const b = seg.querySelector("button.on"); segInd.style.width = b.offsetWidth + "px"; segInd.style.transform = `translateX(${b.offsetLeft - 4}px)`; }
+seg.querySelectorAll("button").forEach(b => b.onclick = () => { seg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); moveInd(); view = b.dataset.v; draw(); });
+addEventListener("resize", moveInd); document.fonts.ready.then(moveInd); moveInd();
+addEventListener("resize", draw); draw();
+
+/* ---------- RESEARCH heatmap ---------- */
+const RCELLS = ["LCD", "RGB OLED", "WOLED", "차세대 OLED", "MicroLED", "구동·터치·기타"], RTAGS = ["칸 전체", "탠덤", "백플레인", "발광 재료", "봉지", "공정"];
+let rComp = "LGD";
+const rc = document.getElementById("rcomp");
+rc.innerHTML = COMP.map(c => `<button data-k="${c.k}" ${S.heat[c.k] ? "" : "disabled style='opacity:.35;cursor:default'"} class="${c.k === rComp ? "on" : ""}">${c.n}${S.heat[c.k] ? "" : " · 수집 중"}</button>`).join("");
+rc.querySelectorAll("button:not([disabled])").forEach(b => b.onclick = () => { rComp = b.dataset.k; rc.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); drawBars(); drawHeat(); });
+let rYear = "2024";
+// year bars: height = that company's patents in the year; click or hover to pick the year
+function drawBars(){
+  const svg = d3.select("#ybars"); svg.selectAll("*").remove();
+  const w = Math.max(280, svg.node().getBoundingClientRect().width || 800), h = 92, comp = COMP.find(c => c.k === rComp);
+  const years = d3.range(2016, 2026).map(String), H0 = S.heat[rComp] || {};
+  const tot = years.map(y => ({y, n: d3.sum(Object.values(H0[y] || {}), c => c._total || 0)}));
+  const x = d3.scaleBand().domain(years).range([0, w]).padding(.28), yS = d3.scaleLinear().domain([0, d3.max(tot, t => t.n) || 1]).range([0, h - 30]);
+  const g = svg.append("g");
+  const bar = g.selectAll("g").data(tot).join("g").style("cursor", "pointer")
+    .on("click mouseenter", (e, t) => { rYear = t.y; document.getElementById("ryearv").textContent = t.y; drawBars(); drawHeat(); });
+  bar.append("rect").attr("x", t => x(t.y) - 4).attr("width", x.bandwidth() + 8).attr("y", 0).attr("height", h).attr("fill", "transparent");
+  bar.append("rect").attr("x", t => x(t.y)).attr("width", x.bandwidth()).attr("y", t => h - 22 - yS(t.n)).attr("height", t => yS(t.n)).attr("rx", 4)
+    .attr("fill", t => t.y === rYear ? comp.c : "#ffffff26").attr("fill-opacity", t => +t.y >= 2024 && t.y !== rYear ? .5 : 1);
+  bar.append("text").attr("x", t => x(t.y) + x.bandwidth() / 2).attr("y", h - 6).attr("text-anchor", "middle")
+    .style("fill", t => t.y === rYear ? "#e9edf1" : "#5d6670").text(t => "'" + t.y.slice(2));
+}
+
+/* study tech (R-5): base technologies whose share inside the chosen cell grew for the company, 2016-19 -> 2020-23 */
+let rCell = "RGB OLED";
+function drawStudy(){
+  const H0 = S.heat[rComp] || {}, comp = COMP.find(c => c.k === rComp);
+  const sum = (yrs, tg) => d3.sum(yrs, y => ((H0[y] || {})[rCell] || {})[tg] || 0);
+  const A = d3.range(2016, 2020).map(String), B = d3.range(2020, 2024).map(String), ta = sum(A, "_total"), tb = sum(B, "_total");
+  const rows = RTAGS.slice(1).map(t => ({t, a: ta ? sum(A, t) / ta * 100 : 0, b: tb ? sum(B, t) / tb * 100 : 0})).map(r => ({...r, d: r.b - r.a})).sort((u,v) => v.d - u.d);
+  const up = rows.filter(r => r.d > 1);
+  document.getElementById("study").innerHTML = `<span style="color:var(--text);font-weight:600">공부할 기술 · ${rCell}</span> <span class="note">${comp.n} 특허 중 이 칸에서 몫이 커진 기반 기술 (2016~2019 → 2020~2023)</span><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+    ${up.length ? up.map(r => `<span class="chip on" style="border-color:${comp.c}"><b style="color:var(--text);font-weight:500">${r.t}</b> <span style="color:#7d8792">${r.a.toFixed(0)} → ${r.b.toFixed(0)}%</span></span>`).join("") : '<span class="note">이 칸에서는 뚜렷하게 커진 기반 기술이 없어요</span>'}</div>
+    <div class="note" style="margin-top:8px">한 줄 설명은 데이터 확정 뒤 초안 → 오너 검수 예정</div>`;
+}
+function drawHeat(){
+  const svg = d3.select("#heat"); svg.selectAll("*").remove();
+  const w = Math.max(320, svg.node().getBoundingClientRect().width || 900), h = 330, m = {t:30, r:10, b:10, l:132};
+  const yr = rYear, d = (S.heat[rComp] || {})[yr] || {};
+  const yearTotal = d3.sum(Object.values(d), c => c._total || 0) || 1;
+  const comp = COMP.find(c => c.k === rComp);
+  const x = d3.scaleBand().domain(RTAGS).range([m.l, w - m.r]).padding(.08), y = d3.scaleBand().domain(RCELLS).range([m.t, h - m.b]).padding(.1);
+  const cells = RCELLS.flatMap(cl => RTAGS.map(tg => { const n = (d[cl] || {})[tg === "칸 전체" ? "_total" : tg] || 0; return {cl, tg, n, share: n / yearTotal}; }));
+  const op = d3.scaleSqrt().domain([0, .5]).range([0.04, 1]).clamp(true);
+  const g = svg.append("g");
+  g.selectAll("rect").data(cells).join("rect").attr("x", c => x(c.tg)).attr("y", c => y(c.cl)).attr("width", x.bandwidth()).attr("height", y.bandwidth()).attr("rx", 6)
+    .attr("fill", comp.c).attr("fill-opacity", c => c.n ? op(c.share) : .03).attr("stroke", c => c.tg === "칸 전체" ? "#ffffff22" : "none")
+    .on("mousemove", (e,c) => showTip(`<b style="color:${comp.c}">${comp.n}</b> ${yr}년<br>${c.cl}${c.tg === "칸 전체" ? "" : " · " + c.tg}<br>특허 <b>${c.n.toLocaleString()}건</b> (그해 전체의 ${(c.share * 100).toFixed(1)}%)`, e.clientX, e.clientY)).on("mouseleave", hideTip);
+  g.selectAll("text.v").data(cells.filter(c => c.n)).join("text").attr("x", c => x(c.tg) + x.bandwidth() / 2).attr("y", c => y(c.cl) + y.bandwidth() / 2 + 4)
+    .attr("text-anchor", "middle").style("fill", c => op(c.share) > .55 ? "#07090c" : "#e9edf1").style("pointer-events", "none").text(c => c.n);
+  g.selectAll("text.r").data(RCELLS).join("text").attr("x", m.l - 10).attr("y", c => y(c) + y.bandwidth() / 2 + 4).attr("text-anchor", "end")
+    .style("fill", c => c === rCell ? "#ffffff" : "#8a939c").style("font-weight", c => c === rCell ? 600 : 400).style("cursor", "pointer").text(c => (c === rCell ? "▸ " : "") + c)
+    .on("click", (e, c) => { rCell = c; drawHeat(); });
+  drawStudy();
+  g.selectAll("text.c").data(RTAGS).join("text").attr("x", t => x(t) + x.bandwidth() / 2).attr("y", m.t - 10).attr("text-anchor", "middle").text(t => t);
+}
+addEventListener("resize", () => { drawBars(); drawHeat(); }); drawBars(); drawHeat();
+
+/* ---------- PARTNERS network ---------- */
+const KIND = {"대학":"#9db7dc", "기업":"#cdb88f", "연구기관":"#9fd2c0", "같은 그룹":"#7b8591"};
+const REL = ["공동특허", "기술 계약", "투자", "공동논문"];
+let pComp = "LGD", sim = null;
+document.getElementById("pkinds").innerHTML = Object.entries(KIND).map(([k,c]) => `<span class="chip on"><i style="background:${c}"></i>${k}</span>`).join("");
+const pseg = document.getElementById("pseg"), pInd = pseg.querySelector(".seg-ind");
+function movePInd(){ const b = pseg.querySelector("button.on"); pInd.style.width = b.offsetWidth + "px"; pInd.style.transform = `translateX(${b.offsetLeft - 4}px)`; }
+pseg.querySelectorAll("button").forEach(b => b.onclick = () => { pseg.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); movePInd(); pComp = b.dataset.k; drawNet(); });
+document.fonts.ready.then(movePInd); movePInd();
+function info(d){
+  const el = document.getElementById("pinfo"), comp = COMP.find(c => c.k === pComp);
+  if(!d){ const top = S.partners[pComp].slice(0, 5).map(p => p.name).join(", ");
+    el.innerHTML = `<div style="color:var(--text);font-size:16px;font-weight:600;margin-bottom:6px">${comp.n}의 협력 상대</div>근거가 많은 순서: ${top}<br><br><span class="note">점을 누르면 자세히 보여요.</span>`; return; }
+  const rel = REL.filter(r => d[r]).map(r => `<div style="display:flex;justify-content:space-between"><span>${r}</span><b style="color:var(--text)">${d[r]}${r === "공동특허" || r === "공동논문" ? "건" : "건"}</b></div>`).join("");
+  const cells = Object.entries(d.cells || {}).slice(0, 4).map(([c,n]) => `${c} ${n}`).join(" · ");
+  el.innerHTML = `<div style="color:var(--text);font-size:17px;font-weight:600">${d.name}</div>
+    <div class="note" style="margin-bottom:10px"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${KIND[d.kind]};margin-right:6px"></i>${d.kind}${d.years ? ` · ${d.years[0]}~${d.years[1]}` : ""}</div>
+    ${rel}${cells ? `<div style="margin-top:10px"><span class="note">공동특허의 기술 칸</span><br>${cells}</div>` : ""}
+    ${d.notes && d.notes.length ? `<div style="margin-top:10px"><span class="note">근거</span><br>${d.notes.map(n => "· " + n).join("<br>")}</div>` : ""}`;
+}
+function drawNet(){
+  const svg = d3.select("#net"); svg.selectAll("*").remove(); if(sim) sim.stop();
+  const w = Math.max(300, svg.node().getBoundingClientRect().width || 700), h = 520, comp = COMP.find(c => c.k === pComp);
+  const parts = S.partners[pComp].slice(0, 32).map(p => ({...p}));
+  const maxS = d3.max(parts, p => p.score), r = d3.scaleSqrt().domain([0, maxS]).range([4, 22]);
+  const center = {name: comp.n, center: true, fx: w / 2, fy: h / 2};
+  const links = parts.map(p => ({source: center, target: p, s: p.score}));
+  const g = svg.append("g");
+  const link = g.selectAll("line").data(links).join("line").attr("stroke", "#ffffff").attr("stroke-opacity", .12).attr("stroke-width", l => 0.6 + 3 * l.s / maxS);
+  const node = g.selectAll("g.n").data(parts).join("g").style("cursor", "pointer")
+    .on("click", (e,d) => { info(d); node.select("circle").attr("stroke", n => n === d ? "#fff" : "none"); });
+  node.append("circle").attr("r", d => r(d.score)).attr("fill", d => KIND[d.kind]).attr("fill-opacity", .9).attr("stroke-width", 2);
+  node.filter((d,i) => i < 14).append("text").attr("dy", d => r(d.score) + 13).attr("text-anchor", "middle").style("fill", "#c5ccd3").style("font-size", "11px").text(d => d.name.length > 12 ? d.name.slice(0, 11) + "…" : d.name);
+  const cg = g.append("g").attr("transform", `translate(${w/2},${h/2})`);
+  cg.append("circle").attr("r", 30).attr("fill", comp.c);
+  cg.append("text").attr("text-anchor", "middle").attr("dy", 5).style("fill", "#07090c").style("font-weight", 600).style("font-size", "13px").text(comp.n);
+  // close + big = more evidence; settles slowly in 2D
+  // distance from the centre = less evidence; partners are spread around the circle with the golden angle
+  const ring = d3.scaleSqrt().domain([maxS, 0]).range([75, Math.min(w, h) / 2 - 30]);
+  parts.forEach((p,i) => { const a = i * 2.39996, R = ring(p.score); p.x = w/2 + Math.cos(a) * R; p.y = h/2 + Math.sin(a) * R; });
+  sim = d3.forceSimulation([center, ...parts])
+    .force("radial", d3.forceRadial(d => d.center ? 0 : ring(d.score), w/2, h/2).strength(.9))
+    .force("charge", d3.forceManyBody().strength(-25))
+    .force("collide", d3.forceCollide(d => d.center ? 40 : r(d.score) + 12).strength(.9))
+    .alphaDecay(.02).velocityDecay(.6)
+    .on("tick", () => {
+      parts.forEach(p => { p.x = Math.max(20, Math.min(w - 20, p.x)); p.y = Math.max(20, Math.min(h - 26, p.y)); });
+      link.attr("x1", w/2).attr("y1", h/2).attr("x2", l => l.target.x).attr("y2", l => l.target.y);
+      node.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+  info(null);
+}
+addEventListener("resize", drawNet); drawNet();
+
+/* ---------- COMPETITION ---------- */
+const CCELLS = [["OLED", ["RGB OLED", "WOLED", "차세대 OLED"]], ["LCD", ["LCD"]], ["MicroLED", ["MicroLED"]], ["구동·터치·기타", ["구동·터치·기타"]]];
+let cCell = "OLED", cMetric = "share", cVis = new Set(COMP.map(c => c.k));
+const YRS = d3.range(2016, 2026);
+function segSetup(id, onPick){
+  const s = document.getElementById(id), ind = s.querySelector(".seg-ind");
+  const move = () => { const b = s.querySelector("button.on"); if(b){ ind.style.width = b.offsetWidth + "px"; ind.style.transform = `translateX(${b.offsetLeft - 4}px)`; } };
+  s.querySelectorAll("button").forEach(b => b.onclick = () => { s.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); move(); onPick(b); });
+  document.fonts.ready.then(move); move(); addEventListener("resize", move);
+}
+document.getElementById("cseg").insertAdjacentHTML("beforeend", CCELLS.map(([k],i) => `<button class="${i ? "" : "on"}" data-c="${k}">${k}</button>`).join(""));
+segSetup("cseg", b => { cCell = b.dataset.c; drawComp(); });
+segSetup("mseg", b => { cMetric = b.dataset.m; drawComp(); });
+function series(){
+  const cells = CCELLS.find(c => c[0] === cCell)[1];
+  return COMP.map(c => { const D = S.us_cells[c.k]; if(!D) return {c, pts: [], done: S.us_done[c.k] || 0};
+    const pts = YRS.map(y => { const v = D[y] || {}, tot = d3.sum(Object.values(v)), n = d3.sum(cells, k => v[k] || 0);
+      return {year: y, n, share: tot ? n / tot * 100 : null, partial: (S.us_done[c.k] || 0) < 120}; }).filter(p => p.share !== null);
+    return {c, pts, done: S.us_done[c.k] || 0}; });
+}
+function drawComp(){
+  const ser = series(), svg = d3.select("#cline"); svg.selectAll("*").remove();
+  const w = Math.max(320, svg.node().getBoundingClientRect().width || 900), h = 320, m = {t:16, r:70, b:28, l:46};
+  const key = cMetric === "share" ? "share" : "n", vis = ser.filter(s => cVis.has(s.c.k) && s.pts.length);
+  const x = d3.scaleLinear().domain([2016, 2025]).range([m.l, w - m.r]);
+  const y = d3.scaleLinear().domain([0, (d3.max(vis.flatMap(s => s.pts), p => p[key]) || 1) * 1.08]).nice().range([h - m.b, m.t]);
+  const g = svg.append("g");
+  g.append("rect").attr("x", x(2023.6)).attr("y", m.t).attr("width", x(2025) - x(2023.6) + 6).attr("height", h - m.t - m.b).attr("fill", "#ffffff06");
+  g.append("text").attr("x", x(2024.8)).attr("y", m.t + 12).attr("text-anchor", "end").text("공개 지연 구간");
+  vis.sort((a,b) => (a.c.k === "LGD") - (b.c.k === "LGD")).forEach(s => {
+    g.append("path").datum(s.pts).attr("fill","none").attr("stroke", s.c.c).attr("stroke-width", s.c.k === "LGD" ? 3 : 1.6).attr("stroke-opacity", s.c.k === "LGD" ? 1 : .85)
+      .attr("d", d3.line().x(p => x(p.year)).y(p => y(p[key])).curve(d3.curveMonotoneX));
+    const l = s.pts[s.pts.length - 1]; g.append("text").attr("x", x(l.year) + 8).attr("y", y(l[key])).attr("dy", 4).style("fill", s.c.c).text(s.c.n);
+  });
+  const guide = g.append("line").attr("y1", m.t).attr("y2", h - m.b).attr("stroke", "#ffffff30").style("opacity", 0);
+  g.append("rect").attr("x", m.l).attr("y", m.t).attr("width", w - m.l - m.r).attr("height", h - m.t - m.b).attr("fill", "transparent")
+    .on("mousemove", e => { const yr = Math.round(x.invert(d3.pointer(e)[0])); guide.attr("x1", x(yr)).attr("x2", x(yr)).style("opacity", 1);
+      showTip(`<b>${yr}년 · ${cCell}</b><br>` + vis.map(s => { const p = s.pts.find(p => p.year === yr); return p ? `<span style="color:${s.c.c}">${s.c.n}</span> ${p.n.toLocaleString()}건 · 회사 안 ${p.share.toFixed(1)}%` : ""; }).join("<br>"), e.clientX, e.clientY); })
+    .on("mouseleave", () => { hideTip(); guide.style("opacity", 0); });
+  g.append("g").attr("class","axis").attr("transform",`translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(10).tickFormat(d3.format("d")));
+  g.append("g").attr("class","axis").attr("transform",`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(5).tickFormat(d => cMetric === "share" ? d + "%" : d3.format(",")(d)));
+  const chips = document.getElementById("cchips");
+  chips.innerHTML = ser.map(s => s.pts.length ? `<span class="chip ${cVis.has(s.c.k) ? "on" : ""}" data-k="${s.c.k}" style="border-color:${cVis.has(s.c.k) ? s.c.c : "#ffffff1f"}"><i style="background:${s.c.c}"></i>${s.c.n}${s.done < 120 ? ` · ${Math.round(s.done / 1.2)}%` : ""}</span>`
+    : `<span class="chip" style="opacity:.4;cursor:default"><i style="background:${s.c.c}"></i>${s.c.n} · 수집 중</span>`).join("");
+  chips.querySelectorAll(".chip[data-k]").forEach(el => el.onclick = () => { const k = el.dataset.k; cVis.has(k) ? cVis.delete(k) : cVis.add(k); drawComp(); });
+  document.getElementById("cread").textContent = cMetric === "share"
+    ? `선이 올라가면 그 회사가 전체 특허 중 더 많은 몫을 ${cCell}에 쓰고 있다는 뜻이에요(회사 크기와 상관없이 "무게를 옮기는 중"). 회사 이름을 눌러 켜고 끌 수 있어요.`
+    : `그해 ${cCell} 칸에 낸 미국 특허 수예요. 회사 크기가 그대로 드러나요. "회사 안 비중"으로 바꾸면 관심이 어디로 옮겨 가는지 보여요.`;
+  document.getElementById("ccav").textContent = "미국 특허는 아직 수집 중이라 BOE는 일부 연도만, CSOT·Tianma·Visionox는 아직 없어요. 2024~2025년은 공개되지 않은 출원이 많아 줄어든 것처럼 보여요(음영). OLED는 RGB·WOLED·차세대를 합쳤어요(WOLED가 특허 글에서 잘 구분되지 않음).";
+  drawBump(ser);
+}
+function drawBump(ser){
+  const svg = d3.select("#cbump"); svg.selectAll("*").remove();
+  const w = Math.max(320, svg.node().getBoundingClientRect().width || 900), h = 230, m = {t:16, r:70, b:24, l:46};
+  const have = ser.filter(s => s.pts.length);
+  const ranks = YRS.map(yr => { const arr = have.map(s => ({k: s.c.k, n: (s.pts.find(p => p.year === yr) || {}).n})).filter(a => a.n != null).sort((a,b) => b.n - a.n); return {yr, arr}; });
+  const x = d3.scaleLinear().domain([2016, 2025]).range([m.l, w - m.r]), y = d3.scalePoint().domain(d3.range(1, Math.max(2, have.length) + 1)).range([m.t, h - m.b]).padding(.5);
+  const g = svg.append("g");
+  y.domain().forEach(r => g.append("text").attr("x", m.l - 14).attr("y", y(r) + 4).attr("text-anchor", "end").text(r + "위"));
+  have.forEach(s => {
+    const pts = ranks.map(R => { const i = R.arr.findIndex(a => a.k === s.c.k); return i < 0 ? null : {yr: R.yr, r: i + 1}; }).filter(Boolean);
+    g.append("path").datum(pts).attr("fill","none").attr("stroke", s.c.c).attr("stroke-width", s.c.k === "LGD" ? 4 : 2.2).attr("stroke-linecap","round").attr("stroke-opacity", s.c.k === "LGD" ? 1 : .8)
+      .attr("d", d3.line().x(p => x(p.yr)).y(p => y(p.r)).curve(d3.curveBumpX));
+    const l = pts[pts.length - 1]; if(l) g.append("text").attr("x", x(l.yr) + 10).attr("y", y(l.r) + 4).style("fill", s.c.c).text(s.c.n);
+  });
+  g.append("g").attr("class","axis").attr("transform",`translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(10).tickFormat(d3.format("d")));
+}
+addEventListener("resize", drawComp); drawComp();
+
+
+</script>
+</body>
+</html>
